@@ -1,9 +1,12 @@
 import requests
 from bs4 import BeautifulSoup
+from PIL import Image
 from rich.console import Console
 from rich.table import Table
 from rich.text import Text
 from rich.panel import Panel
+from climage.climage import _toAnsi
+from climage.__main__ import _get_color_type
 import time
 
 
@@ -57,6 +60,42 @@ def print_banner():
     console.print(banner_text, justify="center")
     console.print(Panel.fit(info, title="[cyan]Get Your Book!!![/cyan]", style="cyan"), justify="center")
 
+def print_usage_1():
+    usage = """
+        /detail or /dt <id> to view detail a book
+        /download or /d <id> to download a book     
+        /back or /b to back     
+        /quit or /q to exit
+    """
+
+    console = Console()
+    console.print(Panel.fit(usage, title="[cyan]Usage[/cyan]", style="cyan"), justify="center")
+
+def print_usage_2():
+    usage = """
+        /download or /d to download a book     
+        /back or /b to back     
+        /quit or /q to exit
+    """
+
+    console = Console()
+    console.print(Panel.fit(usage, title="[cyan]Usage[/cyan]", style="cyan"), justify="center")
+
+def go_to_details(data):
+    print_usage_2()
+
+    print_image("https://b-ok.asia/s/?q=" + data['link'])
+
+
+def convert_url(url, is_unicode=False, is_truecolor=False, is_256color=True, is_16color=False, is_8color=False, width=60, palette="default"):
+    im = Image.open(requests.get(url, stream=True).raw).convert('RGB')
+    ctype = _get_color_type(is_truecolor=is_truecolor, is_256color=is_256color, is_16color=is_16color, is_8color=is_8color)
+    return _toAnsi(im, oWidth=width, is_unicode=is_unicode, color_type=ctype, palette=palette)
+
+def print_image(url):
+    output = convert_url(url, is_unicode=True)
+    print(output)
+    
 def search_book(search_string):
 
     start = time.time()
@@ -126,6 +165,27 @@ def search_book(search_string):
 
     print("Time: ", time.time() - start)
 
+    print_usage_1()
+
+    option = console.input("[bright_blue]>>> [/bright_blue]")
+
+    while option not in ("/back", "/b"):
+        if option in ("/quit", "/q"):
+            pass
+        elif len(option.split(' ')) == 2:
+            optionplt = option.split()
+            print(optionplt)
+            if optionplt[0] in ("/detail", "/dt") and\
+               optionplt[1].isnumeric() and\
+               1 <= int(optionplt[1]) <= len(data):
+                go_to_details(data[int(optionplt[1]) - 1])
+            else:
+                console.print("[bright_red]Invalid Input[/bright_red]")
+        else:
+            console.print("[bright_red]Invalid Input[/bright_red]")
+        option = console.input("[bright_blue]>>> [/bright_blue]")
+
+
 if __name__ == '__main__':
     console = Console()
     
@@ -134,6 +194,10 @@ if __name__ == '__main__':
     print()
     search_string = console.input("[bright_blue]Search: [/bright_blue]")
     
-    search_book(search_string)
+    while search_string not in ("/quit", "/q"):
+        search_book(search_string)
+        search_string = console.input("[bright_blue]Search: [/bright_blue]")
+
+
 
     
