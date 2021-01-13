@@ -4,7 +4,7 @@
 
 Công cụ tra cứu sách
 
-![preview](preview.gif)
+![preview](banner.gif)
 
 ![Version](https://img.shields.io/badge/Version-v0.1-cyan.svg?longCache=true&style=for-the-badge)
 ![AUTHOR](https://img.shields.io/badge/Author-Lưu%20Thành%20Đạt-orange.svg?longCache=true&style=for-the-badge)
